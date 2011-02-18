@@ -1,0 +1,20 @@
+Headers:
+Copy src/ndofdev_external.h to release\libraries\include\ndofdev_external.h
+
+Windows:
+Open the project.
+Build Debug and Release.
+Copy src\win_project_files\Debug\libndofdev.lib to release\libraries\i686-win32\lib_debug
+Copy src\win_project_files\Release\libndofdev.lib to release\libraries\i686-win32\lib_release
+
+XCode:
+Open the project.
+Build Debug and Release.
+Copy src/build/Debug/libndofdev.dylib to release/libraries/universal-darwin/lib_debug/
+Copy src/build/Release/libndofdev.dylib to release/libraries/universal-darwin/lib_release/
+
+
+Linux:
+No official Linux support is maintained in this library.
+A drop-in replacement for Linux is maintained by Jan Ciger at: http://www.aaue.dk/~janoc/index.php?n=Personal.3DConnexionSpaceNavigatorSupport#secondlife
+
