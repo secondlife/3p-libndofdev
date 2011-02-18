@@ -1,0 +1,24 @@
+<?xml version="1.0" ?>
+<llsd>
+<map>
+    <key>package_description</key>
+    <map>
+      <key>copyright</key>
+      <string>Copyright (c) 2007, 3Dconnexion, Inc. - All rights reserved.</string>
+      <key>description</key>
+      <string>3DConnexion SDK</string>
+      <key>license</key>
+      <string>BSD</string>
+      <key>license_file</key>
+      <string>ndofdev/COPYING</string>
+      <key>name</key>
+      <string>ndofdev</string>
+      <key>version</key>
+      <string>0.1</string>
+    </map>
+    <key>type</key>
+    <string>autobuild</string>
+    <key>version</key>
+    <string>1.2</string>
+  </map>
+</llsd>

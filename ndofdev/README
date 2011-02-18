@@ -1,0 +1,4 @@
+This code is from an early version of the 3DConnexion SDK.  It should not be
+confused with the real libndofdev which is a drop-in linux-only replacement for
+the 3DConnexion SDK.
+
