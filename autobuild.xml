@@ -10,7 +10,7 @@
       <key>license</key>
       <string>BSD</string>
       <key>license_file</key>
-      <string>libndofdev/COPYING</string>
+      <string>LICENSES/libndofdev.txt</string>
       <key>name</key>
       <string>libndofdev</string>
       <key>platforms</key>
@@ -35,6 +35,10 @@
               <string>default</string>
             </map>
           </map>
+          <key>manifest</key>
+          <array>
+            <string>include/ndofdev_external.h</string>
+          </array>
           <key>name</key>
           <string>common</string>
         </map>
@@ -75,6 +79,11 @@
               <string>default</string>
             </map>
           </map>
+          <key>manifest</key>
+          <array>
+            <string>lib/debug/*.lib</string>
+            <string>lib/release/*.lib</string>
+          </array>
           <key>name</key>
           <string>windows</string>
         </map>

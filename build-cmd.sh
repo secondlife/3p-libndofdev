@@ -37,10 +37,10 @@ pushd "$SOURCE_DIR"
             mkdir -p "$stage/lib/release"
 			
             cp Release/*\.lib $stage/lib/release/
-            cp Debug/*\.lib $stage/lib/release/
+            cp Debug/*\.lib $stage/lib/debug/
 
-            mkdir -p "$stage/include/$PROJECT"
-            cp -v *.h "$stage/include/$PROJECT"
+            mkdir -p "$stage/include/"
+            cp "ndofdev_external.h" "$stage/include/"
         ;;
         "darwin")
             ./configure --prefix="$stage"
