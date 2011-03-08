@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd "$(dirname "$0")"
+TOP="$(dirname "$0")"
 
 # turn on verbose debugging output for parabuild logs.
 set -x
@@ -9,7 +9,7 @@ set -e
 
 PROJECT="libndofdev"
 VERSION="0.1"
-SOURCE_DIR="$PROJECT/src"
+SOURCE_DIR="$PROJECT"
 
 if [ -z "$AUTOBUILD" ] ; then 
     fail
@@ -24,40 +24,34 @@ set +x
 eval "$("$AUTOBUILD" source_environment)"
 set -x
 
-stage="$(pwd)/stage"
-pushd "$SOURCE_DIR"
-    case "$AUTOBUILD_PLATFORM" in
-        "windows")
-			pwd
+stage="$(pwd)"
+case "$AUTOBUILD_PLATFORM" in
+    "windows")
+        pushd "$TOP/$SOURCE_DIR/src"
             load_vsvars
             build_sln "$PROJECT.sln" "Debug|Win32"
             build_sln "$PROJECT.sln" "Release|Win32"
-
+    
             mkdir -p "$stage/lib/debug"
             mkdir -p "$stage/lib/release"
-			
+            
             cp Release/*\.lib $stage/lib/release/
             cp Debug/*\.lib $stage/lib/debug/
+        popd
+    ;;
+    "darwin")
+        make
+        mkdir -p "$stage/lib/release"
+        cp "src/libndofdev.dylib" "$stage/lib/release"
+    ;;
+    "linux")
+    ;;
+esac
 
-            mkdir -p "$stage/include/"
-            cp "ndofdev_external.h" "$stage/include/"
-        ;;
-        "darwin")
-            ./configure --prefix="$stage"
-            make
-            make install
-			mkdir -p "$stage/include/$PROJECT"
-        ;;
-        "linux")
-            CFLAGS="-m32" CXXFLAGS="-m32" ./configure --prefix="$stage"
-            make
-            make install
-			mkdir -p "$stage/include/$PROJECT"
-        ;;
-    esac
-    mkdir -p "$stage/LICENSES"
-    cp -v ../COPYING  "$stage/LICENSES/$PROJECT.txt"
-popd
+mkdir -p "$stage/include/"
+cp "$TOP/$SOURCE_DIR/src/ndofdev_external.h" "$stage/include/"
+mkdir -p "$stage/LICENSES"
+cp -v "$TOP/$SOURCE_DIR/COPYING"  "$stage/LICENSES/$PROJECT.txt"
 
 pass
 
