@@ -43,6 +43,9 @@ case "$AUTOBUILD_PLATFORM" in
         make
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
+        pushd "$stage/lib/release/"
+            fix_dylib_id libndofdev.dylib
+        popd
     ;;
     "linux")
     ;;
