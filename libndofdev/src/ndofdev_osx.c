@@ -37,7 +37,7 @@
 #include <IOKit/IOCFPlugIn.h>
 #include <IOKit/usb/IOUSBLib.h>
 #include <IOKit/hid/IOHIDUsageTables.h>
-#include <Carbon/Carbon.h>
+#include <CoreServices/CoreServices.h>
 #include "ndofdev_external.h"
 #include "ndofdev_internal.h"
 #include "ndofdev_internal_osx.h"
