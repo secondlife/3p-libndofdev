@@ -25,6 +25,10 @@ eval "$("$AUTOBUILD" source_environment)"
 set -x
 
 stage="$(pwd)"
+
+build=${AUTOBUILD_BUILD_ID:=0}
+echo "${VERSION}.${build}" > "${stage}/VERSION.txt"
+
 case "$AUTOBUILD_PLATFORM" in
     "windows")
         pushd "$TOP/$SOURCE_DIR/src"
