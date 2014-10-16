@@ -44,6 +44,7 @@ case "$AUTOBUILD_PLATFORM" in
         popd
     ;;
     "darwin")
+        # arch, min SDK, deploy SDK etc. set in CMake file
         make
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
