@@ -3,8 +3,5 @@ public_build = true
 
 build_Linux = false
 
-# autobuild uses VS2010
-AUTOBUILD_VSVER=100
-
 USE_INCREDIBUILD=0
 
