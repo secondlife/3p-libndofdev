@@ -30,17 +30,17 @@ build=${AUTOBUILD_BUILD_ID:=0}
 echo "${VERSION}.${build}" > "${stage}/VERSION.txt"
 
 case "$AUTOBUILD_PLATFORM" in
-    "windows")
+    windows*)
         pushd "$TOP/$SOURCE_DIR/src"
             load_vsvars
-            build_sln "$PROJECT.sln" "Debug|Win32"
-            build_sln "$PROJECT.sln" "Release|Win32"
+            build_sln "$PROJECT.sln" "Release|$AUTOBUILD_WIN_VSPLATFORM"
     
-            mkdir -p "$stage/lib/debug"
             mkdir -p "$stage/lib/release"
-            
-            cp Release/*\.lib $stage/lib/release/
-            cp Debug/*\.lib $stage/lib/debug/
+
+            if [ "$AUTOBUILD_ADDRSIZE" = 32 ]
+            then cp Release/*\.lib $stage/lib/release/
+            else cp x64/Release/*\.lib $stage/lib/release/
+            fi
         popd
     ;;
     "darwin")

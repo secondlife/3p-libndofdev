@@ -1,23 +1,24 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40302.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unit_tests", "unit_tests.vcxproj", "{2087D32D-8090-47FA-9E4A-98D682650A79}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libndofdev", "libndofdev.vcxproj", "{23957232-D1D5-45D8-8E4E-14EC59EA0780}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2087D32D-8090-47FA-9E4A-98D682650A79}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2087D32D-8090-47FA-9E4A-98D682650A79}.Debug|Win32.Build.0 = Debug|Win32
 		{2087D32D-8090-47FA-9E4A-98D682650A79}.Release|Win32.ActiveCfg = Release|Win32
-		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Debug|Win32.ActiveCfg = Debug|Win32
-		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Debug|Win32.Build.0 = Debug|Win32
+		{2087D32D-8090-47FA-9E4A-98D682650A79}.Release|x64.ActiveCfg = Release|x64
 		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Release|Win32.ActiveCfg = Release|Win32
 		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Release|Win32.Build.0 = Release|Win32
+		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Release|x64.ActiveCfg = Release|x64
+		{23957232-D1D5-45D8-8E4E-14EC59EA0780}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
