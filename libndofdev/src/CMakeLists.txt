@@ -17,8 +17,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
         ndofdev_hidutils_err.c
         ndofdev_osx.c
     )
-    add_definitions(-DTARGET_OS_MAC -DCMAKE_OSX_SYSROOT=/Developer/SDKs/MacOSX10.9.sdk/ -DCMAKE_OSX_DEPLOYMENT_TARGET=10.7)
-    set(CMAKE_OSX_ARCHITECTURES i386)
 
     find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
     find_library(CORE_SERVICES_FRAMEWORK CoreServices)

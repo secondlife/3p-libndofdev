@@ -6,8 +6,12 @@ TOP="$(dirname "$0")"
 set -x
 # make errors fatal
 set -e
+# complain about unset env variables
+set -u
 
 PROJECT="libndofdev"
+# If there's a version number embedded in the source code somewhere, we
+# haven't yet found it.
 VERSION="0.1"
 SOURCE_DIR="$PROJECT"
 
@@ -16,13 +20,18 @@ if [ -z "$AUTOBUILD" ] ; then
 fi
 
 if [ "$OSTYPE" = "cygwin" ] ; then
-    export AUTOBUILD="$(cygpath -u $AUTOBUILD)"
+    autobuild="$(cygpath -u $AUTOBUILD)"
+else
+    autobuild="$AUTOBUILD"
 fi
 
 # load autbuild provided shell functions and variables
 set +x
-eval "$("$AUTOBUILD" source_environment)"
+eval "$("$autobuild" source_environment)"
 set -x
+
+# set LL_BUILD and friends
+set_build_variables convenience Release
 
 stage="$(pwd)"
 
@@ -43,8 +52,10 @@ case "$AUTOBUILD_PLATFORM" in
             fi
         popd
     ;;
-    "darwin")
-        # arch, min SDK, deploy SDK etc. set in CMake file
+    darwin*)
+        opts="-DTARGET_OS_MAC $LL_BUILD"
+        cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" -DCMAKE_C_FLAGS="$opts" \
+            -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
         make
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
@@ -52,7 +63,13 @@ case "$AUTOBUILD_PLATFORM" in
             fix_dylib_id libndofdev.dylib
         popd
     ;;
-    "linux")
+    linux*)
+        # Given forking and future development work, it seems unwise to
+        # hardcode the actual URL of the current project's libndofdef-linux
+        # repository in this message. Try to determine the URL of this
+        # libndofdev repository and append "-linux" as a suggestion.
+        fail "Linux libndofdev is in a separate libndofdev-linux bitbucket repository\
+${repo_url:+ -- try ${repo_url}-linux}"
     ;;
 esac
 

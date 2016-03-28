@@ -53,15 +53,6 @@
               <key>build</key>
               <map>
               </map>
-              <key>configure</key>
-              <map>
-                <key>arguments</key>
-                <array>
-                  <string>../libndofdev</string>
-                </array>
-                <key>command</key>
-                <string>cmake</string>
-              </map>
               <key>default</key>
               <string>true</string>
               <key>name</key>
