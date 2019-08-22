@@ -48,7 +48,7 @@
 /*****************************************************/
 #if !TARGET_RT_MAC_CFM
 #include <IOKit/hid/IOHIDLib.h>
-#endif TARGET_RT_MAC_CFM
+#endif // TARGET_RT_MAC_CFM
 
 #include <stdio.h>
 
@@ -100,7 +100,7 @@ typedef enum IOHIDReportType {
 // Notes: This is a MachO function pointer. If you're using CFM you have to call MachOFunctionPointerForCFMFunctionPointer.
 typedef void ( *IOHIDCallbackFunction )( void* target, unsigned long result, void* refcon, void* sender );
 typedef void* IOHIDEventStruct;
-#endif TARGET_RT_MAC_CFM
+#endif // TARGET_RT_MAC_CFM
 
 // Device and Element Interfaces
 

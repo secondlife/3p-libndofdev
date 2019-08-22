@@ -86,12 +86,12 @@ static void hu_RemovalNotification(void *inRefCon, io_service_t inService,
 #else
 static void hu_RemovalCallbackFunction(void* target, IOReturn inResult, 
                                        void* inRefCon, void* inSender);
-#endif USE_NOTIFICATIONS
+#endif // USE_NOTIFICATIONS
 
 #if USE_HOTPLUGGING
 // note: was called 'hu_IOServiceMatchingNotification' in HID Utilities
 static void hu_HotPlugAddNotification(void *inRefCon, io_iterator_t inIODeviceIter);
-#endif USE_HOTPLUGGING
+#endif // USE_HOTPLUGGING
 
 /*****************************************************/
 #pragma mark - local ( static ) globals
@@ -105,7 +105,7 @@ static HotPlugCallbackProcPtr	gHotPlugAddCallbackPtr = NULL;
 static HotUnplugCallbackProcPtr	gHotPlugRemovalCallbackPtr = NULL;
 static IONotificationPortRef	gNotifyPort;
 static CFRunLoopRef				gRunLoop;
-#endif USE_HOTPLUGGING
+#endif // USE_HOTPLUGGING
 
 // for element retrieval
 static hu_device_t*				gCurrentDevice  = NULL;
@@ -522,7 +522,7 @@ Boolean HIDGetElementNameFromVendorProductCookie( long inVendorID, long inProduc
 	sprintf( outCStrName, "#{V:%ld, P:%ld, C:%ld}#", inVendorID, inProductID, inCookie );
 #else
 	result = FALSE;
-#endif FAKE_MISSING_NAMES
+#endif // FAKE_MISSING_NAMES
 	return result;
 }	// HIDGetElementNameFromVendorProductCookie
 
@@ -552,7 +552,7 @@ Boolean HIDGetElementNameFromVendorProductUsage( long inVendorID, long inProduct
 #if FAKE_MISSING_NAMES
 	sprintf( outCStrName, "#{V:%ld, P:%ld, U:%ld:%ld}#", inVendorID, inProductID, inUsagePage, inUsage );
 	result = TRUE;
-#endif FAKE_MISSING_NAMES
+#endif // FAKE_MISSING_NAMES
 	return result;
 }	// HIDGetElementNameFromVendorProductUsage
 
@@ -690,14 +690,14 @@ static Boolean hu_XMLSearchForElementNameByCookie( long inVendorID, long inProdu
 							fullCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%@ %@ %@" ), vendorCFStringRef, productCFStringRef, cookieCFStringRef );
 #else
 							fullCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%@" ), cookieCFStringRef );
-#endif VERBOSE_ELEMENT_NAMES
+#endif // VERBOSE_ELEMENT_NAMES
 							// CFShow( cookieCFStringRef );
 						}
 #if FAKE_MISSING_NAMES
 						else {
 							fullCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%@ %@ #%@" ), vendorCFStringRef, productCFStringRef, cookieKeyCFStringRef );
 						}
-#endif FAKE_MISSING_NAMES
+#endif // FAKE_MISSING_NAMES
 						if ( fullCFStringRef ) {
 							// CFShow( fullCFStringRef );
 							results = CFStringGetCString( fullCFStringRef, outCStr, CFStringGetLength( fullCFStringRef ) * sizeof( UniChar ) + 1, kCFStringEncodingMacRoman );
@@ -770,14 +770,14 @@ static Boolean hu_XMLSearchForElementNameByUsage( long inVendorID, long inProduc
 																	vendorCFStringRef, productCFStringRef, usageCFStringRef );
 #else
 						fullCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%@" ), usageCFStringRef );
-#endif VERBOSE_ELEMENT_NAMES
+#endif // VERBOSE_ELEMENT_NAMES
 						// CFShow( usageCFStringRef );
 					}
 #if FAKE_MISSING_NAMES
 					else {
 						fullCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%@ %@ #%@" ), vendorCFStringRef, productCFStringRef, usageKeyCFStringRef );
 					}
-#endif FAKE_MISSING_NAMES
+#endif // FAKE_MISSING_NAMES
 					if ( fullCFStringRef ) {
 						// CFShow( fullCFStringRef );
 						results = CFStringGetCString( fullCFStringRef, outCStr, CFStringGetLength( fullCFStringRef ) * sizeof( UniChar ) + 1, kCFStringEncodingMacRoman );
@@ -946,7 +946,7 @@ static void hu_HotPlugAddNotification( void *inDeviceListHead,
 	if ( noErr == status )
 		hu_AddDevices((hu_device_t**)inDeviceListHead, inIODeviceIter, TRUE);
 }
-#endif USE_HOTPLUGGING
+#endif // USE_HOTPLUGGING
 
 #if USE_NOTIFICATIONS
 /*************************************************************************
@@ -998,7 +998,7 @@ static void hu_RemovalCallbackFunction( void* target, IOReturn inResult, void* i
 {
 	hu_DisposeDevice( ( hu_device_t* ) target );
 }
-#endif USE_NOTIFICATIONS
+#endif // USE_NOTIFICATIONS
 
 
 
@@ -1423,7 +1423,7 @@ static void hu_AddElement( CFTypeRef inElementCFDictRef, hu_element_t **inCurren
 			else {
 				HIDReportError( "hu_AddElement: CFNumberGetValue error when getting value for refUsage or refUsagePage." );
 			}
-#endif 0
+#endif
 		} else {	// collection
 			tElement = ( hu_element_t* ) malloc( sizeof( hu_element_t ) );
 		}
@@ -1518,7 +1518,7 @@ static void hu_AddElement( CFTypeRef inElementCFDictRef, hu_element_t **inCurren
 		
 #if LOG_ELEMENTS
 		HIDPrintElement( tElement );
-#endif LOG_ELEMENTS
+#endif // LOG_ELEMENTS
 		
 		if ( kIOHIDElementTypeCollection == elementType ) { // if this element is a collection of other elements
 			gAddAsChild = TRUE; // add next set as children to this element
@@ -2021,8 +2021,8 @@ static hu_device_t* hu_CreateMultiTypeDeviceList( UInt32 *pUsagePages, UInt32 *p
 														  hu_HotPlugAddNotification,// callback
 														  &gDeviceList, // refCon
 														  &hidObjectIterator);
-#endif TARGET_RT_MAC_CFM
-#endif USE_HOTPLUGGING
+#endif // TARGET_RT_MAC_CFM
+#endif // USE_HOTPLUGGING
 				// add all existing devices
 				deviceList = hu_CreateSingleTypeDeviceList( hidObjectIterator ); // build device list
 				
@@ -2159,7 +2159,7 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 					);
 			fflush( stdout );
 #endif
-#endif LOG_DEVICES
+#endif // LOG_DEVICES
 						
 			newDeviceAt = hu_AddDevice(inDeviceListHead, newDevice);
             
@@ -2187,7 +2187,7 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 													  hu_RemovalNotification, // callback
 													  newDevice, 		// refCon
 													  (io_object_t*)&newDevice->notification);	// notification
-#endif TARGET_RT_MAC_CFM
+#endif // TARGET_RT_MAC_CFM
 			if ( KERN_SUCCESS != result )
 				HIDReportErrorNum( "\nhu_AddDevices: IOServiceAddInterestNotification error: x0%08lX.", result );
 #else
@@ -2203,8 +2203,8 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 				setRemovalCallback(newDevice->interface, 
 								   hu_RemovalCallbackFunction, 
 								   newDeviceAt, 0 );
-#endif TARGET_RT_MAC_CFM
-#endif USE_NOTIFICATIONS
+#endif // TARGET_RT_MAC_CFM
+#endif // USE_NOTIFICATIONS
 		}
 		
 		// release the device object, it is no longer needed
@@ -2319,7 +2319,7 @@ static IOReturn hu_DisposeReleaseQueue( hu_device_t* inDevice )
 				CFRelease( inDevice->queueRunLoopSource );
 				inDevice->queueRunLoopSource = NULL;
 			}
-#endif USE_ASYNC_EVENTS
+#endif // USE_ASYNC_EVENTS
 		} else {
 			HIDReportError( "\nhu_DisposeReleaseQueue - no queue." );
 		}
@@ -2465,7 +2465,7 @@ static hu_device_t* hu_DisposeDevice( hu_device_t* inDevice )
 			if ( kIOReturnSuccess != result )
 				HIDReportErrorNum( "\nhu_DisposeDevice: IOObjectRelease error: 0x%08lX.", result );
 		}
-#endif USE_NOTIFICATIONS
+#endif // USE_NOTIFICATIONS
 		
 		// remove this device from the device list
 		if ( gDeviceList == inDevice ) {	// head of list?
