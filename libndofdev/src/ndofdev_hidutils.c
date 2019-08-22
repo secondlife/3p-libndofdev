@@ -1657,13 +1657,31 @@ static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceC
 {
 	CFMutableDictionaryRef usbProperties = nil;
 	io_registry_entry_t parent1, parent2;
-	
+	kern_return_t rc;
+
 	// Mac OS X currently is not mirroring all USB properties to HID page so need to look at USB device page also
 	// get dictionary for usb properties: step up two levels and get CF dictionary for USB properties
-	if ( ( KERN_SUCCESS == IORegistryEntryGetParentEntry( inHIDDevice, kIOServicePlane, &parent1 ) ) &&
-		 ( KERN_SUCCESS == IORegistryEntryGetParentEntry( parent1, kIOServicePlane, &parent2 ) ) &&
-		 ( KERN_SUCCESS == IORegistryEntryCreateCFProperties( parent2, &usbProperties, kCFAllocatorDefault, kNilOptions ) ) )
+	// try to get parent1
+	rc = IORegistryEntryGetParentEntry( inHIDDevice, kIOServicePlane, &parent1 );
+	if ( KERN_SUCCESS == rc ) {
+		// got parent1, try for parent2
+		rc = IORegistryEntryGetParentEntry( parent1, kIOServicePlane, &parent2 );
+		// either way, release parent1
+		if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
+			HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
+		}
+		if ( KERN_SUCCESS == rc ) {
+			// got parent2, try for usbProperties
+			rc = IORegistryEntryCreateCFProperties( parent2, &usbProperties, kCFAllocatorDefault, kNilOptions );
+			// either way, release parent2
+			if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
+				HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
+			}
+		}
+	}
+	if ( KERN_SUCCESS == rc )
 	{
+		// IORegistryEntryCreateCFProperties() succeeded
 		if ( usbProperties != nil ) {
 			CFTypeRef refCF = 0;
 			// get device info
@@ -1777,13 +1795,6 @@ static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceC
 			CFRelease(usbProperties);
 		} else {
 			HIDReportError( "hu_GetDeviceInfo: IORegistryEntryCreateCFProperties failed to create usbProperties." );
-		}
-
-		if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
-			HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
-		}
-		if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
-			HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
 		}
 	}
 }
