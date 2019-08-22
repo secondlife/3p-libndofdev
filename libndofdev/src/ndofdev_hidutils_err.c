@@ -69,7 +69,7 @@ void HIDReportError( const char* inErrorCStr )
 	// out as debug string
 	{
 #if 1
-        fprintf( stderr, "%s", errMsgCStr );
+        fputs( errMsgCStr, stderr );
 #else
 		Str255 strErr = "\p";
 		CopyCStringToPascal( errMsgCStr, strErr );

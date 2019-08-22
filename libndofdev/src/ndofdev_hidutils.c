@@ -1764,27 +1764,27 @@ static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceC
 						HIDReportError( "hu_GetDeviceInfo: CFNumberGetValue error retrieving inDevice->usage." );
 					}
 			}
-            if ( !refCF ) { // get top level element HID usage page or usage
-                            // use top level element instead
-                CFTypeRef refCFTopElement = 0;
-                refCFTopElement = CFDictionaryGetValue( inDeviceCFDictionaryRef, CFSTR( kIOHIDElementKey ) );
-                {
-                    // refCFTopElement points to an array of element dictionaries
-                    CFRange range = {0, CFArrayGetCount( refCFTopElement )};
-                    CFArrayApplyFunction( refCFTopElement, range, hu_TopLevelElementHandler, NULL );
-                }
-            }
-            CFRelease(usbProperties);
+			if ( !refCF ) { // get top level element HID usage page or usage
+							// use top level element instead
+				CFTypeRef refCFTopElement = 0;
+				refCFTopElement = CFDictionaryGetValue( inDeviceCFDictionaryRef, CFSTR( kIOHIDElementKey ) );
+				{
+					// refCFTopElement points to an array of element dictionaries
+					CFRange range = {0, CFArrayGetCount( refCFTopElement )};
+					CFArrayApplyFunction( refCFTopElement, range, hu_TopLevelElementHandler, NULL );
+				}
+			}
+			CFRelease(usbProperties);
 		} else {
 			HIDReportError( "hu_GetDeviceInfo: IORegistryEntryCreateCFProperties failed to create usbProperties." );
 		}
-			
-        if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
-            HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
-        }
-        if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
-            HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
-        }
+
+		if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
+			HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
+		}
+		if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
+			HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
+		}
 	}
 }
 
