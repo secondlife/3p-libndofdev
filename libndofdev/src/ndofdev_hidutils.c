@@ -753,6 +753,7 @@ static Boolean hu_XMLSearchForElementNameByUsage( long inVendorID, long inProduc
 				if ( !CFDictionaryGetValueIfPresent( vendorCFDictionaryRef, kNameKeyCFStringRef, ( const void** ) &vendorCFStringRef ) ) {
 					vendorCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "v: %ld" ), inVendorID );
 					//CFShow( vendorCFStringRef );
+					CFRelease(vendorCFStringRef);
 				}
 				productKeyCFStringRef = CFStringCreateWithFormat( kCFAllocatorDefault, NULL, CFSTR( "%ld" ), inProductID );
 				
@@ -1360,20 +1361,20 @@ static void hu_AddElement( CFTypeRef inElementCFDictRef, hu_element_t **inCurren
 	CFTypeRef		tElementCFDictRefType  = CFDictionaryGetValue( inElementCFDictRef, CFSTR( kIOHIDElementTypeKey ) );
 	CFTypeRef		refUsagePage	= CFDictionaryGetValue( inElementCFDictRef, CFSTR( kIOHIDElementUsagePageKey ) );
 	CFTypeRef		refUsage		= CFDictionaryGetValue( inElementCFDictRef, CFSTR( kIOHIDElementUsageKey ) );
-	long			elementType, usagePage, usage;
+	long			elementType = 0, usagePage = 0, usage = 0;
 	
-	if ( tElementCFDictRefType )
+    if ( tElementCFDictRefType ) {
 		CFNumberGetValue( tElementCFDictRefType, kCFNumberLongType, &elementType );
-	
-	if ( refUsagePage )
-		CFNumberGetValue( refUsagePage, kCFNumberLongType, &usagePage );
-	
-	if ( refUsage )
+    }
+    if ( refUsagePage ) {
+ 		CFNumberGetValue( refUsagePage, kCFNumberLongType, &usagePage );
+    }
+    if ( refUsage ) {
 		CFNumberGetValue( refUsage, kCFNumberLongType, &usage );
-	
-	if ( !tDevice )
+    }
+    if ( !tDevice ) {
 		return;
-	
+    }
 	if ( elementType ) {
 		// look at types of interest
 		if ( elementType != kIOHIDElementTypeCollection ) {
@@ -1654,7 +1655,7 @@ static void hu_TopLevelElementHandler( const void* value, void* parameter )
 
 static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceCFDictionaryRef, hu_device_t* inDevice )
 {
-	CFMutableDictionaryRef usbProperties = 0;
+	CFMutableDictionaryRef usbProperties = nil;
 	io_registry_entry_t parent1, parent2;
 	
 	// Mac OS X currently is not mirroring all USB properties to HID page so need to look at USB device page also
@@ -1663,7 +1664,7 @@ static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceC
 		 ( KERN_SUCCESS == IORegistryEntryGetParentEntry( parent1, kIOServicePlane, &parent2 ) ) &&
 		 ( KERN_SUCCESS == IORegistryEntryCreateCFProperties( parent2, &usbProperties, kCFAllocatorDefault, kNilOptions ) ) )
 	{
-		if ( usbProperties ) {
+		if ( usbProperties != nil ) {
 			CFTypeRef refCF = 0;
 			// get device info
 			// try hid dictionary first, if fail then go to usb dictionary
@@ -1763,27 +1764,27 @@ static void hu_GetDeviceInfo( io_object_t inHIDDevice, CFDictionaryRef inDeviceC
 						HIDReportError( "hu_GetDeviceInfo: CFNumberGetValue error retrieving inDevice->usage." );
 					}
 			}
-				if ( !refCF ) { // get top level element HID usage page or usage
-								// use top level element instead
-					CFTypeRef refCFTopElement = 0;
-					refCFTopElement = CFDictionaryGetValue( inDeviceCFDictionaryRef, CFSTR( kIOHIDElementKey ) );
-					{
-						// refCFTopElement points to an array of element dictionaries
-						CFRange range = {0, CFArrayGetCount( refCFTopElement )};
-						CFArrayApplyFunction( refCFTopElement, range, hu_TopLevelElementHandler, NULL );
-					}
-				}
+            if ( !refCF ) { // get top level element HID usage page or usage
+                            // use top level element instead
+                CFTypeRef refCFTopElement = 0;
+                refCFTopElement = CFDictionaryGetValue( inDeviceCFDictionaryRef, CFSTR( kIOHIDElementKey ) );
+                {
+                    // refCFTopElement points to an array of element dictionaries
+                    CFRange range = {0, CFArrayGetCount( refCFTopElement )};
+                    CFArrayApplyFunction( refCFTopElement, range, hu_TopLevelElementHandler, NULL );
+                }
+            }
+            CFRelease(usbProperties);
 		} else {
 			HIDReportError( "hu_GetDeviceInfo: IORegistryEntryCreateCFProperties failed to create usbProperties." );
 		}
 			
-			CFRelease( usbProperties );
-			if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
-				HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
-			}
-			if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
-				HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
-			}
+        if ( kIOReturnSuccess != IOObjectRelease( parent2 ) ) {
+            HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent2." );
+        }
+        if ( kIOReturnSuccess != IOObjectRelease( parent1 ) ) {
+            HIDReportError( "hu_GetDeviceInfo: IOObjectRelease error with parent1." );
+        }
 	}
 }
 
@@ -1960,7 +1961,7 @@ static hu_device_t* hu_CreateSingleTypeDeviceList( io_iterator_t inHIDObjectIter
 
 static hu_device_t* hu_CreateMultiTypeDeviceList( UInt32 *pUsagePages, UInt32 *pUsages, UInt32 inNumDeviceTypes )
 {
-	io_iterator_t hidObjectIterator = nil;
+	io_iterator_t hidObjectIterator = 0;
 	hu_device_t* newDeviceList = NULL; // build new list
 	UInt32 i;
 	
@@ -1984,7 +1985,7 @@ static hu_device_t* hu_CreateMultiTypeDeviceList( UInt32 *pUsagePages, UInt32 *p
 			result = IOServiceGetMatchingServices( kIOMasterPortDefault, hidMatchingCFDictRef, &hidObjectIterator );
 			if ( kIOReturnSuccess != result ) {
 				HIDReportErrorNum( "\nhu_CreateMultiTypeDeviceList: Failed to create IO object iterator, error:", result );
-			} else if ( nil == hidObjectIterator ) { // likely no HID devices which matched selection criteria are connected
+			} else if ( 0 == hidObjectIterator ) { // likely no HID devices which matched selection criteria are connected
 				HIDReportError( "hu_CreateMultiTypeDeviceList: Could not find any matching devices, thus iterator creation failed." );
 			}
 			
@@ -2116,10 +2117,10 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
                           Boolean inHotplugFlag)
 {
 	IOReturn result = kIOReturnSuccess;	// assume success( optimist! )
-	io_object_t ioHIDDeviceObject = nil;
+	io_object_t ioHIDDeviceObject = 0;
 	
-	while ( nil != (ioHIDDeviceObject = IOIteratorNext( inIODeviceIterator ) ) ) {
-		hu_device_t **newDeviceAt = nil;
+	while ( 0 != (ioHIDDeviceObject = IOIteratorNext( inIODeviceIterator ) ) ) {
+		hu_device_t **newDeviceAt = NULL;
 		hu_device_t* newDevice = hu_BuildDevice( ioHIDDeviceObject );
 		if ( newDevice ) {
 #if LOG_DEVICES
