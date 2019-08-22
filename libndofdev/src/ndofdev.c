@@ -136,7 +136,7 @@ void ndof_libcleanup()
 /* -------------------------------------------------------------------------- */
 unsigned char ndof_match(NDOF_Device *dev1, NDOF_Device *dev2)
 {
-    if (dev1 && dev2 && dev1->manufacturer && dev2->manufacturer)
+    if (dev1 && dev2)
     {
         size_t lenm1 = strlen(dev1->manufacturer);
         size_t lenp1 = strlen(dev1->product);
