@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <dispatch/dispatch.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/IOMessage.h>
 #include <IOKit/IOCFPlugIn.h>
@@ -50,8 +51,8 @@
 static CFRunLoopRef					s_runloop = NULL;
 static NDOF_DeviceAddCallback		s_add_callback;
 static NDOF_DeviceRemovalCallback	s_removal_callback;
-static MPTaskID						s_task_id;
-static MPSemaphoreID				s_semaphore;
+static dispatch_semaphore_t         s_init_sem = nil;
+static dispatch_queue_t             s_hotplug_queue = nil;
 
 /* -------------------------------------------------------------------------- */
 #pragma mark * Function prototypes for local functions
@@ -62,7 +63,6 @@ static OSStatus ndof_removal_callback(hu_device_t *d);
 static short ndof_isndof(hu_device_t *dev);
 static void ndof_init(NDOF_Device *dev, hu_device_t *hiddev);
 static Boolean ndof_equivalent(NDOF_Device *dev1, hu_device_t *hiddev2);
-static OSStatus ndof_hotplug_loop(void* param);
 
 #pragma mark * Function implementations *
 
@@ -326,28 +326,39 @@ int ndof_libinit(NDOF_DeviceAddCallback in_add_cb,
 				 NDOF_DeviceRemovalCallback in_removal_cb,
 				 void *param)
 {
-	int err = 0;
-	
 	fprintf(stderr, "libndofdev: initializing...\n");
 
     s_add_callback = in_add_cb;
 	s_removal_callback = in_removal_cb;
     
-	MPCreateSemaphore(1, 0, &s_semaphore);
-	err = MPCreateTask(&ndof_hotplug_loop, NULL, 0x80000, 
-					   NULL, NULL, NULL, 0, &s_task_id);
-	assert(err == noErr);
+    // setup dispatch serial queue
+    s_init_sem = dispatch_semaphore_create(1);
+    s_hotplug_queue = dispatch_queue_create("hotplug", DISPATCH_QUEUE_SERIAL);
+
+    // initialize the hotplug loop
+    dispatch_async(s_hotplug_queue, ^{
+        HIDSetHotPlugCallback(ndof_add_callback, ndof_removal_callback);
+        HIDBuildDeviceList(0, 0);
+        s_runloop = CFRunLoopGetCurrent();
+        
+        /* signal father that we are about to start the runloop */
+        fprintf(stderr, "libndofdev: starting runloop...\n");
+        dispatch_semaphore_signal(s_init_sem);
+        
+        /* Start the run loop. Now we'll receive hotplugging notifications. */
+        CFRunLoopRun();
+        
+        fprintf(stderr, "libndofdev: runloop terminated, destroying HID data...\n");
+        HIDReleaseDeviceList();
+    });
     
-    if (err == noErr)
-    {
-        // we block until the other thread has completed initialization
-        MPWaitOnSemaphore(s_semaphore, kDurationMillisecond * 60000);
+    // we block until the other thread has completed initialization
+    dispatch_semaphore_wait(s_init_sem, kDurationMillisecond * 60000);
     
-        // be extra cautious, make sure thread gets into runloop before we return
-        usleep(10000);
-    }
+    // be extra cautious, make sure thread gets into runloop before we return
+    usleep(10000);
     
-    return err;
+    return 0;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -359,14 +370,15 @@ void ndof_cleanup_internal()
 		CFRunLoopStop(s_runloop);
 	}
     
-	MPDeleteSemaphore(s_semaphore);
+    dispatch_release(s_init_sem);
 }
 
 /* -------------------------------------------------------------------------- */
 void ndof_dev_private_dispose(NDOF_DevicePrivate *priv)
 {
-    if (priv)
+    if (priv) {
         free(priv);
+    }
 }
 
 #pragma mark * Hot-plugging *
@@ -384,27 +396,6 @@ void ndof_dev_private_dispose(NDOF_DevicePrivate *priv)
     4- user connects new device and would like to use that 
     ==> notify client of new NDOF_Device, client can decide to keep it or not
 */
-
-/* -------------------------------------------------------------------------- */
-static OSStatus ndof_hotplug_loop(void* param)
-{
-	HIDSetHotPlugCallback(ndof_add_callback, ndof_removal_callback);
-	HIDBuildDeviceList(0, 0);
-	s_runloop = CFRunLoopGetCurrent();
-    
-	/* signal father that we are about to start the runloop */
-    fprintf(stderr, "libndofdev: starting runloop...\n");
-	MPSignalSemaphore(s_semaphore);
-    
-    /* Start the run loop. Now we'll receive hotplugging notifications. */
-    CFRunLoopRun();
-    
-	fprintf(stderr, "libndofdev: runloop terminated, destroying HID data...\n");
-	HIDReleaseDeviceList();
-	MPExit(noErr);
-	
-	return 0;
-}
 
 /* -------------------------------------------------------------------------- 
 	Purpose:    Callback invoked by HiD Utils when a new device is plugged in
