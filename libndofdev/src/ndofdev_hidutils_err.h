@@ -62,10 +62,10 @@ extern "C" {
 #pragma mark - exported function prototypes
     
 // Error reporter, can be set to report however the application desires
-extern void HIDReportError( char* inErrorCStr );
+extern void HIDReportError( const char* inErrorCStr );
 
 // Error with numeric code reporter, can be set to report however the application desires
-extern void HIDReportErrorNum( char* inErrorCStr, long inErrorNum );
+extern void HIDReportErrorNum( const char* inErrorCStr, long inErrorNum );
     
 /*****************************************************/
 #if PRAGMA_STRUCT_ALIGN

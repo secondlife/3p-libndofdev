@@ -38,12 +38,13 @@
 * Inputs:   inErrorCStr	- the error string
 *			inErrorNum	- the error number
 */
-void HIDReportErrorNum( char* inErrorCStr, long inErrorNum )
+void HIDReportErrorNum( const char* inErrorCStr, long inErrorNum )
 {
 #if kVerboseErrors
 	char errMsgCStr [256];
 
-	sprintf( errMsgCStr, "%s #%ld( 0x%lx )", inErrorCStr, inErrorNum, inErrorNum );
+	snprintf( errMsgCStr, sizeof(errMsgCStr), "%s #%ld( 0x%lx )",
+             inErrorCStr, inErrorNum, inErrorNum );
 
 	// out as debug string
 	HIDReportError( errMsgCStr );
@@ -58,17 +59,17 @@ void HIDReportErrorNum( char* inErrorCStr, long inErrorNum )
 * Inputs:   inErrorCStr	- the error string
 * Returns:  nothing
 */
-void HIDReportError( char* inErrorCStr )
+void HIDReportError( const char* inErrorCStr )
 {
 #if kVerboseErrors
 	char errMsgCStr [256];
 
-	sprintf( errMsgCStr, "%s", inErrorCStr );
+    strncpy(errMsgCStr, inErrorCStr, sizeof(errMsgCStr));
 
 	// out as debug string
 	{
 #if 1
-		fprintf( stderr, errMsgCStr );
+        fprintf( stderr, "%s", errMsgCStr );
 #else
 		Str255 strErr = "\p";
 		CopyCStringToPascal( errMsgCStr, strErr );
