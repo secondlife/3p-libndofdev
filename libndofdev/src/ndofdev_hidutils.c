@@ -132,19 +132,22 @@ static UInt32					gNumDevices		= 0;
 */
 static CFPropertyListRef hu_LoadFromXMLFile( CFURLRef inCFURLRef )
 {
-	CFDataRef xmlCFDataRef;
-	CFPropertyListRef myCFPropertyListRef = NULL;
+	CFPropertyListRef propertyList = nil;
 	
 	// Read the XML file.
-	SInt32 error;
-	if ( CFURLCreateDataAndPropertiesFromResource( kCFAllocatorDefault, inCFURLRef, &xmlCFDataRef, NULL, NULL, &error ) ) {
-		CFStringRef errorString;
-		// Reconstitute the dictionary using the XML data.
-		myCFPropertyListRef = CFPropertyListCreateFromXMLData( kCFAllocatorDefault, xmlCFDataRef, kCFPropertyListImmutable, &errorString );
-		// Release the XML data
-		CFRelease( xmlCFDataRef );
-	}
-	return myCFPropertyListRef;
+    CFPropertyListFormat propertyListFormat;
+    
+    CFReadStreamRef fileStream = CFReadStreamCreateWithFile(kCFAllocatorDefault, inCFURLRef);
+    if (fileStream != nil) {
+        if ( CFReadStreamOpen(fileStream) ) {
+            propertyList = CFPropertyListCreateWithStream(
+                                kCFAllocatorDefault, fileStream, 0,
+                                kCFPropertyListImmutable, &propertyListFormat, nil);
+        }
+        CFRelease(fileStream);
+    }
+    
+    return propertyList;
 }	// hu_LoadFromXMLFile
 
 
