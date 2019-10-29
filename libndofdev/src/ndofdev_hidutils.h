@@ -38,10 +38,12 @@
 
 #define USE_HOTPLUGGING 	TRUE	// set TRUE to enable hot plugging!
 #define USE_NOTIFICATIONS 	TRUE	// set TRUE to use notifications instead of device callbacks for hot unplugging!
-#define LOG_DEVICES			FALSE	// for debugging; Logs new devices to stdout
-#define LOG_ELEMENTS		FALSE	// for debugging; Logs new elements to stdout
-#define LOG_SCORING			FALSE	// for debugging; Logs HIDFindDevice & HIDFindActionDeviceAndElement scoring to stdout
-#define LOG_SEARCHING		FALSE	// for debugging; Logs HIDFindSubElement searching info to stdout
+// #define any of the symbols below (or on the compiler command line) to the
+// desired output stream
+//#define LOG_DEVICES			stderr	// for debugging; Logs new devices
+//#define LOG_ELEMENTS		stderr	// for debugging; Logs new elements
+//#define LOG_SCORING			stderr	// for debugging; Logs HIDFindDevice & HIDFindActionDeviceAndElement scoring
+//#define LOG_SEARCHING		stderr	// for debugging; Logs HIDFindSubElement searching info
 
 /*****************************************************/
 #pragma mark - includes & imports
@@ -277,7 +279,7 @@ extern void HIDGetTypeName( IOHIDElementType inIOHIDElementType, char* inCStrNam
 extern void HIDGetUsageName( long inUsagePage, long inUsage, char* inCStrName );
 
 // print out all of an elements information
-extern int HIDPrintElement( const hu_element_t* inElement );
+extern int HIDPrintElement( FILE* stream, const hu_element_t* inElement );
 
 // return TRUE if this is a valid device pointer
 extern Boolean HIDIsValidDevice( const hu_device_t* inDevice );

@@ -73,8 +73,8 @@ int ndof_libinit()
         (dev->axis > 2
          || strstr(dev->manufacturer, "3Dconnexion")))
     {
-#if NDOF_DEBUG
-        fprintf(stderr, "  NDOF device found: %s %s: #inputs=%ld; #axes=%ld; "
+#ifdef NDOF_DEBUG
+        fprintf(NDOF_DEBUG, "  NDOF device found: %s %s: #inputs=%ld; #axes=%ld; "
                 "#buttons=%ld\n", dev->manufacturer, dev->product, 
                 dev->inputs, dev->axis, dev->buttons);
 #endif
@@ -125,13 +125,13 @@ int ndof_firstdev(NDOF_Device *dev)
         return notfound;
     }
 
-    ret = hid_write_identification(stdout, hid);
+    ret = hid_write_identification(stderr, hid);
     if (ret != HID_RET_SUCCESS) {
         fprintf(stderr, "hid_write_identification failed with return code %d\n", ret);
         return notfound;
     }
   
-    ret = hid_dump_tree(stdout, hid);
+    ret = hid_dump_tree(stderr, hid);
     if (ret != HID_RET_SUCCESS) {
         fprintf(stderr, "hid_dump_tree failed with return code %d\n", ret);
         return notfound;
@@ -156,7 +156,7 @@ int ndof_firstdev(NDOF_Device *dev)
                 NDOF_DevicePrivate *priv;
                 pRecElement elem = NULL;
                 long axesCnt = 0, btnCnt = 0;
-                #if NDOF_DEBUG
+                #ifdef NDOF_DEBUG
                 int debug_miscCnt = 0;
                 #endif
                 
@@ -183,13 +183,13 @@ int ndof_firstdev(NDOF_Device *dev)
                              && btnCnt < d->buttons)
                         priv->btnElem[btnCnt++] = elem;
                     
-                    #if NDOF_DEBUG
+                    #ifdef NDOF_DEBUG
                     if (elem->type == kIOHIDElementTypeInput_Misc
                         && elem->size > 1 && (elem->max - elem->min > 2)
                         )
                     {
                         debug_miscCnt++;
-                        fprintf(stderr, "tmp_miscCnt=%d;\n", debug_miscCnt);
+                        fprintf(NDOF_DEBUG, "tmp_miscCnt=%d;\n", debug_miscCnt);
                     }
                     #endif
                     
@@ -197,7 +197,7 @@ int ndof_firstdev(NDOF_Device *dev)
                 }
                 assert(axesCnt == d->axis);
                 assert(btnCnt == d->buttons);
-                #if NDOF_DEBUG
+                #ifdef NDOF_DEBUG
                 assert(debug_miscCnt == d->axis);
                 #endif
                 

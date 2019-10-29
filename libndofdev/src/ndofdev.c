@@ -116,8 +116,8 @@ void ndof_libcleanup()
 {
     NDOF_DeviceListNode *node;
 
-#if NDOF_DEBUG
-    fprintf(stderr, "libndofdev: cleaning up...\n");
+#ifdef NDOF_DEBUG
+    fprintf(NDOF_DEBUG, "libndofdev: cleaning up...\n");
 #endif
 
     while (g_ndof_list_head)
@@ -130,7 +130,9 @@ void ndof_libcleanup()
     
     ndof_cleanup_internal();
 
-    fprintf(stderr, "libndofdev: clean up completed.\n");
+#ifdef NDOF_DEBUG
+    fprintf(NDOF_DEBUG, "libndofdev: clean up completed.\n");
+#endif
 }
 
 /* -------------------------------------------------------------------------- */
@@ -155,29 +157,29 @@ unsigned char ndof_match(NDOF_Device *dev1, NDOF_Device *dev2)
 }
 
 /* -------------------------------------------------------------------------- */
-void ndof_dump_list()
+void ndof_dump_list(FILE* stream)
 {
     NDOF_DeviceListNode *node = g_ndof_list_head;
     
-    fprintf(stderr, "libndofdev: List of currently used NDOF devices:\n");
+    fprintf(stream, "libndofdev: List of currently used NDOF devices:\n");
  
     while (node)
     {
-        ndof_dump(node->dev);
+        ndof_dump(stream, node->dev);
         node = node->next;
     }
 }
 
 /* -------------------------------------------------------------------------- */
-void ndof_dump(NDOF_Device *dev)
+void ndof_dump(FILE* stream, NDOF_Device *dev)
 {
     if (dev == NULL)
     {
-        fprintf(stderr, "libndofdev: NULL device");
+        fprintf(stream, "libndofdev: NULL device");
         return;
     }
     
-	fprintf(stderr, "libndofdev: manufacturer=%s; product=%s; axes_count=%d; " \
+	fprintf(stream, "libndofdev: manufacturer=%s; product=%s; axes_count=%d; " \
 			"btn_count=%d; min=%ld; max=%ld; absolute=%d; valid=%d; " \
             "private_data=%p;\n", 
 			dev->manufacturer, dev->product, dev->axes_count, dev->btn_count, 
@@ -188,20 +190,20 @@ void ndof_dump(NDOF_Device *dev)
     {
         int i;
         NDOF_DevicePrivate *priv = (NDOF_DevicePrivate*)dev->private_data;
-        fprintf(stderr, "    curr_loc_id=%08lX\n", priv->curr_loc_id);
+        fprintf(stream, "    curr_loc_id=%08lX\n", priv->curr_loc_id);
         
-        fprintf(stderr, "    scales:  [");
+        fprintf(stream, "    scales:  [");
         for (i=0; i<NDOF_MAX_AXES_COUNT; i++)
-             fprintf(stderr, "%f ", priv->scale[i]);
+             fprintf(stream, "%f ", priv->scale[i]);
         
-        fprintf(stderr, "]\n    offsets: [");
+        fprintf(stream, "]\n    offsets: [");
         for (i=0; i<NDOF_MAX_AXES_COUNT; i++)
-            fprintf(stderr, "%f ", priv->offset[i]);
+            fprintf(stream, "%f ", priv->offset[i]);
 
-        fprintf(stderr, "]\n");
+        fprintf(stream, "]\n");
     }
 #elif defined(_WIN32) || defined(WIN32)
-	fprintf(stderr, "type=%hd; subtype=%hd\n", 
+	fprintf(stream, "type=%hd; subtype=%hd\n", 
 			((NDOF_DevicePrivate*)dev->private_data)->type,
 			((NDOF_DevicePrivate*)dev->private_data)->subtype);
 #endif	
@@ -240,7 +242,7 @@ void test_device_list_add()
 	{
 		m++;
 		dev1 = node->dev;
-		ndof_dump(dev1);
+		ndof_dump(stderr, dev1);
 		node = node->next;
 	}		
 	assert(m == n + 2);

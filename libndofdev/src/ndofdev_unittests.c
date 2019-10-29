@@ -73,7 +73,7 @@ void test_ndof_create()
 	
     dev = ndof_create();
     
-	ndof_dump(dev);
+	ndof_dump(stderr, dev);
     assert(dev->private_data != NULL);
     assert(strcmp(dev->manufacturer, "") == 0);
     assert(strcmp(dev->product, "") == 0);
@@ -102,7 +102,7 @@ void test_ndof_init_first()
     dev = ndof_create();
     err = ndof_init_first(dev, NULL);
     
-	ndof_dump(dev);
+	ndof_dump(stderr, dev);
     fprintf(stderr, "err=%d\n", err);
     assert(err == 0);
     assert(dev->private_data != NULL);

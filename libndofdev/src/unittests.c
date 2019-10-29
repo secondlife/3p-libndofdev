@@ -97,7 +97,7 @@ void test_read_values_loop()
 	hotplug_dev->absolute = 0;
     err = ndof_init_first(hotplug_dev, NULL);
     fprintf(stderr, "test_read_values_loop: err=%d. Using device:\n", err);
-    ndof_dump(hotplug_dev);
+    ndof_dump(stderr, hotplug_dev);
 
     // poll device
 	tstart = t0 = usecs_since_startup();
@@ -147,7 +147,7 @@ void run_all_tests()
 {
     int err;
     
-#if NDOF_DEBUG
+#ifdef NDOF_DEBUG
     // does its own libinit and libcleanup
     //run_noninteractive_tests();
 #endif

@@ -38,7 +38,7 @@
 static LPDIRECTINPUT8 gDI = NULL;   // DI interface
 static HWND gDIWnd = NULL;          // window associated with DI
 
-#if NDOF_DEBUG
+#ifdef NDOF_DEBUG
 void ndof_print_deviceinstance_info(const DIDEVICEINSTANCE *dev_info);
 #endif
 
@@ -349,11 +349,11 @@ void ndof_update(NDOF_Device *in_dev)
 		}
 	}
 
-    #if NDOF_DEBUG
+    #ifdef NDOF_DEBUG
     if (in_dev->axes[0] || in_dev->axes[1] || in_dev->axes[2] 
         || in_dev->axes[3] || in_dev->axes[4] || in_dev->axes[5])
     {
-        fprintf(stderr, "ndof_update: %ld %ld %ld %ld %ld %ld\n", 
+        fprintf(NDOF_DEBUG, "ndof_update: %ld %ld %ld %ld %ld %ld\n", 
                 in_dev->axes[0], in_dev->axes[1], in_dev->axes[2], 
                 in_dev->axes[3], in_dev->axes[4], in_dev->axes[5]);
     }
@@ -393,11 +393,11 @@ unsigned char ndof_match_private(NDOF_DevicePrivate *d1, NDOF_DevicePrivate *d2)
 	return (d1 && d2 && d1->type == d2->type && d1->subtype == d2->subtype);
 }
 
-#if NDOF_DEBUG
+#ifdef NDOF_DEBUG
 /* -------------------------------------------------------------------------- */
 void ndof_print_deviceinstance_info(const DIDEVICEINSTANCE *dev_info)
 {
-	fprintf(stderr, "Product Name: %s;\n Instance Name: %s;\n " \
+	fprintf(NDOF_DEBUG, "Product Name: %s;\n Instance Name: %s;\n " \
 			"size=%lu;\n HID Usage Page code=%d;\n HID Usage code=%d;\n", 
 			dev_info->tszProductName, dev_info->tszInstanceName, 
 			dev_info->dwSize, dev_info->wUsagePage, dev_info->wUsage);
@@ -408,43 +408,43 @@ void ndof_print_deviceinstance_info(const DIDEVICEINSTANCE *dev_info)
 	switch (dev_type)
 	{
 	case DI8DEVTYPE_1STPERSON:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "1st person");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "1st person");
 		break;
 	case DI8DEVTYPE_DEVICE:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Unknown category");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Unknown category");
 		break;
 	case DI8DEVTYPE_DEVICECTRL:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Device Control");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Device Control");
 		break;
 	case DI8DEVTYPE_DRIVING:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Driving");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Driving");
 		break;
 	case DI8DEVTYPE_FLIGHT: 
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Flight");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Flight");
 		break;
 	case DI8DEVTYPE_GAMEPAD:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Gamepad");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Gamepad");
 		break;
 	case DI8DEVTYPE_JOYSTICK:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Joystick");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Joystick");
 		break;
 	case DI8DEVTYPE_KEYBOARD: 
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Keyboard");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Keyboard");
 		break;
 	case DI8DEVTYPE_MOUSE:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Mouse");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Mouse");
 		break;
 	case DI8DEVTYPE_REMOTE:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Remote");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Remote");
 		break;
 	case DI8DEVTYPE_SCREENPOINTER:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Screen Pointer");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Screen Pointer");
 		break;
 	case DI8DEVTYPE_SUPPLEMENTAL:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Supplemental");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Supplemental");
 		break;
 	default:
-		fprintf(stderr, "Type: %lu (%s)\n", dev_type, "Undefined");
+		fprintf(NDOF_DEBUG, "Type: %lu (%s)\n", dev_type, "Undefined");
 		break;
 	}
 }

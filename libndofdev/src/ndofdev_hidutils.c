@@ -802,28 +802,29 @@ static Boolean hu_XMLSearchForElementNameByUsage( long inVendorID, long inProduc
 
 /*************************************************************************
 *
-* HIDPrintElement( inElement )
+* HIDPrintElement( stream, inElement )
 *
 * Purpose:  printf out all of an elements information
 *
-* Inputs:   inElement	- the element
+* Inputs:   stream      - FILE* to which to write output
+*           inElement	- the element
 *
 * Returns:  int			- number of char's output
 */
-int HIDPrintElement( const hu_element_t* inElement )
+int HIDPrintElement( FILE* stream, const hu_element_t* inElement )
 {
 	int results;
 	int count;
 	
-	printf( "\n" );
+	fprintf( stream, "\n" );
 	
 	if ( gDepth != inElement->depth )
-		printf( "%d", gDepth );
+		fprintf( stream, "%d", gDepth );
 	for ( count = 0;count < inElement->depth;count++ )
-		printf( " | " );
+		fprintf( stream, " | " );
 	
 #if 0	// this is verbose
-	results = printf( "-HIDPrintElement = {name: \"%s\", t: 0x%.2lX, u:%ld:%ld, c: %ld, min/max: %ld/%ld, "   \
+	results = fprintf( stream, "-HIDPrintElement = {name: \"%s\", t: 0x%.2lX, u:%ld:%ld, c: %ld, min/max: %ld/%ld, " \
 					  "scaled: %ld/%ld, size: %ld, rel: %s, wrap: %s, nonLinear: %s, preferred: %s, nullState: %s, "  \
 					  "units: %ld, exp: %ld, cal: %ld/%ld, user: %ld/%ld, depth: %ld}.",
 					  inElement->name, 						// name of element( c string )
@@ -850,7 +851,7 @@ int HIDPrintElement( const hu_element_t* inElement )
 					  inElement->depth
 					  );
 #else	// this is brief
-	results = printf( "-HIDPrintElement = {t: 0x%lX, u:%ld:%ld, c: %ld, name: \"%s\", d: %ld}.",
+	results = fprintf( stream, "-HIDPrintElement = {t: 0x%lX, u:%ld:%ld, c: %ld, name: \"%s\", d: %ld}.",
 					  inElement->type, 				// the type defined by IOHIDElementType in IOHIDKeys.h
 					  inElement->usagePage, 			// usage page from IOUSBHIDParser.h which defines general usage
 					  inElement->usage, 				// usage within above page from IOUSBHIDParser.h which defines specific usage
@@ -859,7 +860,7 @@ int HIDPrintElement( const hu_element_t* inElement )
 					  inElement->depth
 					  );
 #endif
-	fflush( stdout );
+	fflush( stream );
 	return results;
 }
 
@@ -1520,8 +1521,8 @@ static void hu_AddElement( CFTypeRef inElementCFDictRef, hu_element_t **inCurren
 			}
 		}
 		
-#if LOG_ELEMENTS
-		HIDPrintElement( tElement );
+#ifdef LOG_ELEMENTS
+		HIDPrintElement( LOG_ELEMENTS, tElement );
 #endif // LOG_ELEMENTS
 		
 		if ( kIOHIDElementTypeCollection == elementType ) { // if this element is a collection of other elements
@@ -2134,9 +2135,9 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 		hu_device_t **newDeviceAt = NULL;
 		hu_device_t* newDevice = hu_BuildDevice( ioHIDDeviceObject );
 		if ( newDevice ) {
-#if LOG_DEVICES
+#ifdef LOG_DEVICES
 #if 0 // verbose
-			printf( "hu_AddDevices: newDevice = {t: \"%s\", v: %ld, p: %ld, v: %ld, m: \"%s\", " \
+			fprintf( LOG_DEVICES, "hu_AddDevices: newDevice = {t: \"%s\", v: %ld, p: %ld, v: %ld, m: \"%s\", " \
 					"p: \"%s\", l: %ld, u: %4.4lX:%4.4lX, #e: %ld, #f: %ld, #i: %ld, #o: %ld, " \
 					"#c: %ld, #a: %ld, #b: %ld, #h: %ld, #s: %ld, #d: %ld, #w: %ld}.\n",
 					newDevice->transport,
@@ -2160,9 +2161,9 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 					newDevice->dials,
 					newDevice->wheels
 					);
-			fflush( stdout );
+			fflush( LOG_DEVICES );
 #else	// otherwise output brief description
-			printf( "hu_AddDevices: newDevice = {m: \"%s\" p: \"%s\", vid: %ld, pid: %ld, loc: %08lX, axes:  %ld, usage: %4.4lX:%4.4lX}.\n",
+			fprintf( LOG_DEVICES, "hu_AddDevices: newDevice = {m: \"%s\" p: \"%s\", vid: %ld, pid: %ld, loc: %08lX, axes:  %ld, usage: %4.4lX:%4.4lX}.\n",
 					newDevice->manufacturer,
 					newDevice->product,
 					newDevice->vendorID,
@@ -2172,7 +2173,7 @@ static void hu_AddDevices(hu_device_t **inDeviceListHead,
 					newDevice->usagePage,
 					newDevice->usage
 					);
-			fflush( stdout );
+			fflush( LOG_DEVICES );
 #endif
 #endif // LOG_DEVICES
 						

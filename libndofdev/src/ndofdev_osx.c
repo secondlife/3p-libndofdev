@@ -236,7 +236,7 @@ int ndof_init_first(NDOF_Device *dev, void *param)
         fprintf(stderr, "libndofdev: using %s HID device:\n",
                 (HIDIsValidDevice(((NDOF_DevicePrivate*)dev->private_data)->dev) ?
                  "valid" : "invalid"));
-		ndof_dump(dev);
+		ndof_dump(stderr, dev);
 	}
     
     return notfound;
@@ -279,12 +279,12 @@ void ndof_update(NDOF_Device *in_dev)
         in_dev->buttons[i] = HIDGetElementValue(priv->dev, priv->hid_btn[i]);
     }
     
-#if NDOF_DEBUG
+#ifdef NDOF_DEBUG
     if (in_dev->axes[0] || in_dev->axes[1] || in_dev->axes[2] 
         || in_dev->axes[3] || in_dev->axes[4] || in_dev->axes[5]
         || in_dev->buttons[0] || in_dev->buttons[1])
     {
-        fprintf(stderr, "ndof_update(): [%6ld %6ld %6ld %6ld %6ld %6ld] " \
+        fprintf(NDOF_DEBUG, "ndof_update(): [%6ld %6ld %6ld %6ld %6ld %6ld] " \
                 "[%4ld %4ld]\n",
                 in_dev->axes[0], in_dev->axes[1], in_dev->axes[2], 
                 in_dev->axes[3], in_dev->axes[4], in_dev->axes[5],
@@ -477,18 +477,18 @@ static OSStatus ndof_add_callback(hu_device_t *in_dev)
         }
     }
 
-#if NDOF_DEBUG
-    ndof_dump_list();
+#ifdef NDOF_DEBUG
+    ndof_dump_list(NDOF_DEBUG);
 #if 0
 	hu_device_t *d = HIDGetFirstDevice();
-	printf("libndofdev: new device list:\n");
+	fprintf(NDOF_DEBUG, "libndofdev: new device list:\n");
 	while (d)
 	{
-		printf( "Device = {m: \"%s\" p: \"%s\", vid: %ld, pid: %ld, " \
+		fprintf( NDOF_DEBUG, "Device = {m: \"%s\" p: \"%s\", vid: %ld, pid: %ld, " \
 				"loc: %08lX, axes:  %ld, usage: %4.4lX:%4.4lX}.\n",
 				d->manufacturer, d->product, d->vendorID, d->productID,
 				d->locID, d->axis, d->usagePage, d->usage);
-		fflush( stdout );
+		fflush( NDOF_DEBUG );
 		
 		d = HIDGetNextDevice(d);
 	}
