@@ -332,7 +332,8 @@ int ndof_libinit(NDOF_DeviceAddCallback in_add_cb,
 	s_removal_callback = in_removal_cb;
     
     // setup dispatch serial queue
-    s_init_sem = dispatch_semaphore_create(1);
+    // creating a semaphore with count 0 causes wait() to block until signal()
+    s_init_sem = dispatch_semaphore_create(0);
     s_hotplug_queue = dispatch_queue_create("hotplug", DISPATCH_QUEUE_SERIAL);
 
     // initialize the hotplug loop
@@ -351,12 +352,13 @@ int ndof_libinit(NDOF_DeviceAddCallback in_add_cb,
         fprintf(stderr, "libndofdev: runloop terminated, destroying HID data...\n");
         HIDReleaseDeviceList();
     });
-    
-    // we block until the other thread has completed initialization
-    dispatch_semaphore_wait(s_init_sem, kDurationMillisecond * 60000);
-    
-    // be extra cautious, make sure thread gets into runloop before we return
-    usleep(10000);
+
+    // block until the other thread has completed initialization
+    dispatch_semaphore_wait(
+        s_init_sem,
+        // dispatch_time_t is absolute: use dispatch_time() to set a timeout
+        // the specified number of nanoseconds in the future.
+        dispatch_time(DISPATCH_TIME_NOW, 10*NSEC_PER_SEC));
     
     return 0;
 }
