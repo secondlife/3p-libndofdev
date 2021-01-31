@@ -58,6 +58,14 @@ case "$AUTOBUILD_PLATFORM" in
         cp "src/libndofdev.dylib" "$stage/lib/release"
         pushd "$stage/lib/release/"
             fix_dylib_id libndofdev.dylib
+
+            CONFIG_FILE="$build_secrets_checkout/code-signing-osx/config.sh"
+            if [ -f "$CONFIG_FILE" ]; then
+                source $CONFIG_FILE
+                codesign --force --timestamp --sign "$APPLE_SIGNATURE" "libndofdev.dylib"
+            else 
+                echo "No config file found; skipping codesign."
+            fi
         popd
     ;;
     linux*)
