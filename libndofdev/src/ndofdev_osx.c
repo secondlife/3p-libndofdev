@@ -57,7 +57,6 @@ static dispatch_queue_t             s_hotplug_queue = nil;
 /* -------------------------------------------------------------------------- */
 #pragma mark * Function prototypes for local functions
 
-static NDOF_Device *ndof_idsearch(long loc_id);
 static OSStatus ndof_add_callback(hu_device_t *d);
 static OSStatus ndof_removal_callback(hu_device_t *d);
 static short ndof_isndof(hu_device_t *dev);
@@ -87,7 +86,7 @@ static short ndof_isndof(hu_device_t *dev)
 }
 
 /* -------------------------------------------------------------------------- */
-static NDOF_Device *ndof_idsearch(long loc_id)
+NDOF_Device *ndof_idsearch(long loc_id)
 {
 	NDOF_DeviceListNode *node = g_ndof_list_head;
 	while (node)

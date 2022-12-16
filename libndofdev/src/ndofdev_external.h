@@ -124,6 +124,7 @@ extern void ndof_dump_list(FILE* stream);
 #if TARGET_OS_MAC
 /** Returns the number of connected NDOF devices. Implemented only on OS X. */
 extern int ndof_devcount();
+extern NDOF_Device *ndof_idsearch(long loc_id);
 #endif
 
 #ifdef __cplusplus
