@@ -32,6 +32,9 @@ source_environment_tempfile="$stage/source_environment.sh"
 "$autobuild" source_environment > "$source_environment_tempfile"
 . "$source_environment_tempfile"
 
+# remove_cxxstd
+source "$(dirname "$AUTOBUILD_VARIABLES_FILE")/functions"
+
 build=${AUTOBUILD_BUILD_ID:=0}
 echo "${VERSION}.${build}" > "${stage}/VERSION.txt"
 
@@ -51,8 +54,9 @@ case "$AUTOBUILD_PLATFORM" in
     ;;
     darwin*)
         opts="-DTARGET_OS_MAC $LL_BUILD_RELEASE"
-        cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" -DCMAKE_C_FLAGS="$opts" \
-            -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
+        cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" \
+              -DCMAKE_C_FLAGS="$(remove_cxxstd $opts)" \
+              -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
         make -j$(nproc)
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
