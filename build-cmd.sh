@@ -32,6 +32,9 @@ source_environment_tempfile="$stage/source_environment.sh"
 "$autobuild" source_environment > "$source_environment_tempfile"
 . "$source_environment_tempfile"
 
+# remove_cxxstd
+source "$(dirname "$AUTOBUILD_VARIABLES_FILE")/functions"
+
 build=${AUTOBUILD_BUILD_ID:=0}
 echo "${VERSION}.${build}" > "${stage}/VERSION.txt"
 
@@ -51,30 +54,23 @@ case "$AUTOBUILD_PLATFORM" in
     ;;
     darwin*)
         opts="-DTARGET_OS_MAC $LL_BUILD_RELEASE"
-        cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" -DCMAKE_C_FLAGS="$opts" \
-            -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
-        make
+        cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" \
+              -DCMAKE_C_FLAGS="$(remove_cxxstd $opts)" \
+              -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
+        make -j$(nproc)
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
         pushd "$stage/lib/release/"
             fix_dylib_id libndofdev.dylib
 
-            CONFIG_FILE="$build_secrets_checkout/code-signing-osx/config.sh"
-            if [ -f "$CONFIG_FILE" ]; then
-                source $CONFIG_FILE
-                codesign --force --timestamp --sign "$APPLE_SIGNATURE" "libndofdev.dylib"
-            else 
-                echo "No config file found; skipping codesign."
-            fi
+            # CONFIG_FILE="$build_secrets_checkout/code-signing-osx/config.sh"
+            # if [ -f "$CONFIG_FILE" ]; then
+            #     source $CONFIG_FILE
+            #     codesign --force --timestamp --sign "$APPLE_SIGNATURE" "libndofdev.dylib"
+            # else 
+            #     echo "No config file found; skipping codesign."
+            # fi
         popd
-    ;;
-    linux*)
-        # Given forking and future development work, it seems unwise to
-        # hardcode the actual URL of the current project's libndofdef-linux
-        # repository in this message. Try to determine the URL of this
-        # libndofdev repository and prepend "open-" as a suggestion.
-        echo "Linux libndofdev is in a separate open-libndofdev bitbucket repository \
--- try $(hg paths default | sed 's/libndofdev/open-&/')" 1>&2 ; exit 1
     ;;
 esac
 
