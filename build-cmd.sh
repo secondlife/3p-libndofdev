@@ -15,7 +15,7 @@ PROJECT="libndofdev"
 VERSION="0.1"
 SOURCE_DIR="$PROJECT"
 
-if [ -z "$AUTOBUILD" ] ; then 
+if [ -z "$AUTOBUILD" ] ; then
     exit 1
 fi
 
@@ -43,7 +43,7 @@ case "$AUTOBUILD_PLATFORM" in
         pushd "$TOP/$SOURCE_DIR/src"
             load_vsvars
             build_sln "$PROJECT.sln" "Release|$AUTOBUILD_WIN_VSPLATFORM"
-    
+
             mkdir -p "$stage/lib/release"
 
             if [ "$AUTOBUILD_ADDRSIZE" = 32 ]
@@ -53,23 +53,21 @@ case "$AUTOBUILD_PLATFORM" in
         popd
     ;;
     darwin*)
+        export MACOSX_DEPLOYMENT_TARGET="$LL_BUILD_DARWIN_DEPLOY_TARGET"
+
         opts="-DTARGET_OS_MAC $LL_BUILD_RELEASE"
         cmake ../libndofdev -DCMAKE_CXX_FLAGS="$opts" \
-              -DCMAKE_C_FLAGS="$(remove_cxxstd $opts)" \
-              -DCMAKE_OSX_ARCHITECTURES="$AUTOBUILD_CONFIGURE_ARCH"
+            -DCMAKE_C_FLAGS="$(remove_cxxstd $opts)" \
+            -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+            -DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOSX_DEPLOYMENT_TARGET} \
+            -DCMAKE_MACOSX_RPATH=YES
         make -j$(nproc)
         mkdir -p "$stage/lib/release"
         cp "src/libndofdev.dylib" "$stage/lib/release"
         pushd "$stage/lib/release/"
-            fix_dylib_id libndofdev.dylib
-
-            # CONFIG_FILE="$build_secrets_checkout/code-signing-osx/config.sh"
-            # if [ -f "$CONFIG_FILE" ]; then
-            #     source $CONFIG_FILE
-            #     codesign --force --timestamp --sign "$APPLE_SIGNATURE" "libndofdev.dylib"
-            # else 
-            #     echo "No config file found; skipping codesign."
-            # fi
+            #fix_dylib_id libndofdev.dylib
+            dsymutil libndofdev.dylib
+            strip -x -S libndofdev.dylib
         popd
     ;;
 esac
