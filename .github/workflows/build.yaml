@@ -1,17 +1,21 @@
 name: Build
-on: [push]
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: [v*]
 jobs:
   build:
     strategy:
       matrix:
-        os: [windows-2022, macos-11]
+        os: [windows-2022, macos-15]
         addrsize: ["64"]
         include:
           - os: windows-2022
             addrsize: "32"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: secondlife/action-autobuild@v4
+      - uses: secondlife/action-autobuild@v5
         with:
           addrsize: ${{ matrix.addrsize }}
   release:

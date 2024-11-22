@@ -439,7 +439,7 @@ long HIDGetElementEvent( const hu_device_t* inDevice, hu_element_t* inElement, I
 		if ( inDevice->interface ) {
 			// ++ NOTE: If the element type is feature then use queryElementValue instead of getElementValue
 			if ( kIOHIDElementTypeFeature == inElement->type ) {
-				result = ( *( IOHIDDeviceInterface** ) inDevice->interface )->queryElementValue( inDevice->interface, inElement->cookie, &hidEvent, 0, NULL, NULL, NULL );
+				result = ( *( IOHIDDeviceInterface** ) inDevice->interface )->queryElementValue( inDevice->interface, (IOHIDElementCookie)inElement->cookie, &hidEvent, 0, NULL, NULL, NULL );
 				if ( kIOReturnUnsupported == result )	// unless it's unsuported.
 					goto try_getElementValue;
 				else if ( kIOReturnSuccess != result ) {
@@ -447,7 +447,7 @@ long HIDGetElementEvent( const hu_device_t* inDevice, hu_element_t* inElement, I
 				}
 			} else if ( inElement->type <= kIOHIDElementTypeInput_ScanCodes ) {
 try_getElementValue:
-				result = ( *( IOHIDDeviceInterface** ) inDevice->interface )->getElementValue( inDevice->interface, inElement->cookie, &hidEvent );
+				result = ( *( IOHIDDeviceInterface** ) inDevice->interface )->getElementValue( inDevice->interface, (IOHIDElementCookie)inElement->cookie, &hidEvent );
 				if ( kIOReturnSuccess != result ) {
 					HIDReportErrorNum( "\nHIDGetElementEvent - Could not get HID element value via getElementValue.", result );
 				}
@@ -1207,7 +1207,7 @@ static void hu_GetElementInfo( CFTypeRef inElementCFDictRef, hu_element_t* inEle
 	// get the cookie
 	tCFTypeRef = CFDictionaryGetValue( inElementCFDictRef, CFSTR( kIOHIDElementCookieKey ) );
 	if ( tCFTypeRef && CFNumberGetValue( tCFTypeRef, kCFNumberLongType, &number ) ) {
-		inElement->cookie = ( IOHIDElementCookie ) number;
+		inElement->cookie = (void*)(size_t)( IOHIDElementCookie ) number;
 	} else {
 		inElement->cookie = ( IOHIDElementCookie ) 0;
 	}
@@ -2361,14 +2361,14 @@ static IOReturn hu_DisposeReleaseQueue( hu_device_t* inDevice )
 unsigned long HIDDequeueDevice( hu_device_t* inDevice )
 {
 	IOReturn result = kIOReturnSuccess;	// assume success( optimist! )
-	
+
 	if ( HIDIsValidDevice( inDevice ) ) {
 		if ( ( inDevice->interface ) && ( inDevice->queue ) ) {
 			// iterate through elements and if queued, remove
 			hu_element_t* inElement = HIDGetFirstDeviceElement( inDevice, kHIDElementTypeIO );
 			while ( inElement ) {
-				if ( ( *( IOHIDQueueInterface** ) inDevice->queue )->hasElement( inDevice->queue, inElement->cookie ) ) {
-					result = ( *( IOHIDQueueInterface** ) inDevice->queue )->removeElement( inDevice->queue, inElement->cookie );
+				if ( ( *( IOHIDQueueInterface** ) inDevice->queue )->hasElement( inDevice->queue, (IOHIDElementCookie)inElement->cookie ) ) {
+					result = ( *( IOHIDQueueInterface** ) inDevice->queue )->removeElement( inDevice->queue, (IOHIDElementCookie)inElement->cookie );
 					if ( kIOReturnSuccess != result ) {
 						HIDReportErrorNum( "\nHIDDequeueDevice - Failed to remove element from queue.", result );
 					}
